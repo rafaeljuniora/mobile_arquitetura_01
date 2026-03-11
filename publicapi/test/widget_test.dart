@@ -5,9 +5,11 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:publicapi/core/network/http_client.dart';
+import 'package:publicapi/data/datasources/product_cache_datasource.dart';
 import 'package:publicapi/data/datasources/product_remote_datasource.dart';
 import 'package:publicapi/data/repositories/product_repository_impl.dart';
 import 'package:publicapi/main.dart';
@@ -16,13 +18,14 @@ import 'package:publicapi/presentation/viewmodels/product_viewmodel.dart';
 void main() {
   testWidgets('Carrega tela de produtos', (WidgetTester tester) async {
     final client = HttpClient();
-    final datasource = ProductRemoteDatasource(client);
-    final repository = ProductRepositoryImpl(datasource);
+    final remoteDatasource = ProductRemoteDatasource(client);
+    final cacheDatasource = ProductCacheDatasource();
+    final repository = ProductRepositoryImpl(remoteDatasource, cacheDatasource);
     final viewModel = ProductViewModel(repository);
 
     await tester.pumpWidget(MyApp(viewModel: viewModel));
 
-    expect(find.text('Produtos'), findsOneWidget);
-    expect(find.text('Carregar Produtos'), findsOneWidget);
+    expect(find.text('Products'), findsOneWidget);
+    expect(find.byIcon(Icons.download), findsOneWidget);
   });
 }

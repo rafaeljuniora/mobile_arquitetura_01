@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:publicapi/core/network/http_client.dart';
+import 'package:publicapi/data/datasources/product_cache_datasource.dart';
 import 'package:publicapi/data/datasources/product_remote_datasource.dart';
 import 'package:publicapi/data/repositories/product_repository_impl.dart';
 import 'package:publicapi/presentation/pages/product_page.dart';
@@ -7,8 +8,9 @@ import 'package:publicapi/presentation/viewmodels/product_viewmodel.dart';
 
 void main() {
   final client = HttpClient();
-  final datasource = ProductRemoteDatasource(client);
-  final repository = ProductRepositoryImpl(datasource);
+  final remoteDatasource = ProductRemoteDatasource(client);
+  final cacheDatasource = ProductCacheDatasource();
+  final repository = ProductRepositoryImpl(remoteDatasource, cacheDatasource);
   final viewModel = ProductViewModel(repository);
 
   runApp(MyApp(viewModel: viewModel));

@@ -1,15 +1,32 @@
+import 'package:publicapi/core/errors/failure.dart';
+import 'package:publicapi/data/datasources/product_cache_datasource.dart';
 import 'package:publicapi/data/datasources/product_remote_datasource.dart';
+import 'package:publicapi/data/models/product_model.dart';
 import 'package:publicapi/domain/entities/product.dart';
 import 'package:publicapi/domain/repositories/product_repository.dart';
 
 class ProductRepositoryImpl implements ProductRepository {
-  final ProductRemoteDatasource datasource;
+  final ProductRemoteDatasource remote;
+  final ProductCacheDatasource cache;
 
-  ProductRepositoryImpl(this.datasource);
+  ProductRepositoryImpl(this.remote, this.cache);
 
   @override
   Future<List<Product>> getProducts() async {
-    final models = await datasource.getProducts();
+    try {
+      final models = await remote.getProducts();
+      cache.save(models);
+      return _toDomain(models);
+    } catch (e) {
+      final cached = cache.get();
+      if (cached != null) {
+        return _toDomain(cached);
+      }
+      throw Failure('Não foi possível carregar os produtos');
+    }
+  }
+
+  List<Product> _toDomain(List<ProductModel> models) {
     return models
         .map(
           (model) => Product(
