@@ -34,6 +34,10 @@ class ProductRepositoryImpl implements ProductRepository {
             title: model.title,
             price: model.price,
             image: model.image,
+            description: model.description,
+            category: model.category,
+            ratingRate: model.ratingRate,
+            ratingCount: model.ratingCount,
           ),
         )
         .toList();

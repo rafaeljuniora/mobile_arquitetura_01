@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:publicapi/presentation/pages/product_details_page.dart';
 import 'package:publicapi/presentation/viewmodels/product_state.dart';
 import 'package:publicapi/presentation/viewmodels/product_viewmodel.dart';
 
@@ -27,17 +28,30 @@ class ProductPage extends StatelessWidget {
             itemBuilder: (context, index) {
               final product = state.products[index];
               return ListTile(
-                leading: Image.network(product.image, width: 40),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ProductDetailsPage(product: product),
+                    ),
+                  );
+                },
+                leading: SizedBox(
+                  width: 40,
+                  child: product.image.isEmpty
+                      ? const Icon(Icons.image_not_supported)
+                      : Image.network(
+                          product.image,
+                          errorBuilder: (_, __, ___) =>
+                              const Icon(Icons.broken_image),
+                        ),
+                ),
                 title: Text(product.title),
-                subtitle: Text('\$${product.price}'),
+                subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
               );
             },
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: viewModel.loadProducts,
-        child: const Icon(Icons.download),
       ),
     );
   }

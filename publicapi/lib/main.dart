@@ -3,7 +3,7 @@ import 'package:publicapi/core/network/http_client.dart';
 import 'package:publicapi/data/datasources/product_cache_datasource.dart';
 import 'package:publicapi/data/datasources/product_remote_datasource.dart';
 import 'package:publicapi/data/repositories/product_repository_impl.dart';
-import 'package:publicapi/presentation/pages/product_page.dart';
+import 'package:publicapi/presentation/pages/home_page.dart';
 import 'package:publicapi/presentation/viewmodels/product_viewmodel.dart';
 
 void main() {
@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Public API Products',
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
-      home: ProductPage(viewModel: viewModel),
+      home: HomePage(viewModel: viewModel),
     );
   }
 }
