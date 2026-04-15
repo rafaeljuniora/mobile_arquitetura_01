@@ -5,6 +5,7 @@ class Product {
   final String description;
   final String category;
   final String image;
+  final bool favorite;
 
   const Product({
     this.id,
@@ -13,6 +14,7 @@ class Product {
     required this.description,
     required this.category,
     required this.image,
+    this.favorite = false,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class Product {
       description: json['description']?.toString() ?? '',
       category: json['category']?.toString() ?? '',
       image: json['image']?.toString() ?? '',
+      favorite: json['favorite'] == true,
     );
   }
 
@@ -34,6 +37,7 @@ class Product {
       'description': description,
       'category': category,
       'image': image,
+      'favorite': favorite,
     };
   }
 
@@ -44,6 +48,7 @@ class Product {
     String? description,
     String? category,
     String? image,
+    bool? favorite,
   }) {
     return Product(
       id: id ?? this.id,
@@ -52,6 +57,7 @@ class Product {
       description: description ?? this.description,
       category: category ?? this.category,
       image: image ?? this.image,
+      favorite: favorite ?? this.favorite,
     );
   }
 

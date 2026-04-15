@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:publicapi/models/product.dart';
+import 'package:publicapi/providers/product_favorites_provider.dart';
 import 'package:publicapi/screens/product_detail_screen.dart';
+import 'package:publicapi/screens/product_favorites_activity_screen.dart';
 import 'package:publicapi/screens/product_form_screen.dart';
 import 'package:publicapi/services/product_service.dart';
 import 'package:publicapi/widgets/product_card.dart';
@@ -89,7 +92,26 @@ class _ProductListScreenState extends State<ProductListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Lista de Produtos')),
+      appBar: AppBar(
+        title: const Text('Lista de Produtos'),
+        actions: [
+          IconButton(
+            tooltip: 'Atividade favoritos',
+            icon: const Icon(Icons.star_outline),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ChangeNotifierProvider(
+                    create: (_) => ProductFavoritesProvider(ProductService()),
+                    child: const ProductFavoritesActivityScreen(),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: FutureBuilder<List<Product>>(
         future: _productsFuture,
         builder: (context, snapshot) {
