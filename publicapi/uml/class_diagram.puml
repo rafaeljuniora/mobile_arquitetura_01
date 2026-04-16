@@ -1,0 +1,134 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+left to right direction
+
+package "App" {
+  class MyApp <<Widget>> {
+    + autoLoadProducts: bool
+    + build(context: BuildContext): Widget
+  }
+}
+
+package "Models" {
+  class Product {
+    + id: int?
+    + title: String
+    + price: double
+    + description: String
+    + category: String
+    + image: String
+    + favorite: bool
+    + fromJson(json: Map<String, dynamic>): Product
+    + toJson(): Map<String, dynamic>
+    + copyWith(...): Product
+  }
+}
+
+package "Services" {
+  class ProductService {
+    - _dio: Dio
+    + ProductService(dio: Dio?)
+    + fetchProducts(): Future<List<Product>>
+    + addProduct(product: Product): Future<Product>
+    + updateProduct(product: Product): Future<Product>
+    + deleteProduct(id: String): Future<void>
+  }
+}
+
+package "Providers / Notifiers" {
+  class ProductFavoritesProvider {
+    - _service: ProductService
+    - _products: List<Product>
+    - _isLoading: bool
+    - _showOnlyFavorites: bool
+    - _error: String?
+    + isLoading: bool
+    + showOnlyFavorites: bool
+    + error: String?
+    + favoriteCount: int
+    + products: List<Product>
+    + loadProducts(): Future<void>
+    + toggleFavorite(target: Product): void
+    + toggleFavoritesFilter(): void
+  }
+}
+
+package "Screens" {
+  class ProductListScreen <<Widget>> {
+    + autoLoad: bool
+  }
+
+  class _ProductListScreenState <<State>> {
+    - _service: ProductService
+    - _productsFuture: Future<List<Product>>
+    + initState(): void
+    + _reload(): void
+    + _openForm(product: Product?): Future<void>
+    + _deleteProduct(product: Product): Future<void>
+    + build(context: BuildContext): Widget
+  }
+
+  class ProductDetailScreen <<Widget>> {
+    + product: Product
+    + build(context: BuildContext): Widget
+  }
+
+  class ProductFormScreen <<Widget>> {
+    + product: Product?
+  }
+
+  class _ProductFormScreenState <<State>> {
+    - _service: ProductService
+    - _isSubmitting: bool
+    + initState(): void
+    + dispose(): void
+    + _submit(): Future<void>
+    + build(context: BuildContext): Widget
+  }
+
+  class ProductFavoritesActivityScreen <<Widget>>
+
+  class _ProductFavoritesActivityScreenState <<State>> {
+    + initState(): void
+    + build(context: BuildContext): Widget
+  }
+}
+
+package "Widgets" {
+  class ProductCard <<Widget>> {
+    + product: Product
+    + onTap: VoidCallback
+    + onEdit: VoidCallback
+    + onDelete: VoidCallback
+    + build(context: BuildContext): Widget
+  }
+}
+
+MyApp --> ProductListScreen
+
+ProductService ..> Product
+ProductFavoritesProvider --> ProductService
+ProductFavoritesProvider o-- Product
+
+ProductListScreen --> _ProductListScreenState
+_ProductListScreenState --> ProductService
+_ProductListScreenState --> Product
+_ProductListScreenState --> ProductCard
+_ProductListScreenState ..> ProductDetailScreen
+_ProductListScreenState ..> ProductFormScreen
+_ProductListScreenState ..> ProductFavoritesActivityScreen
+_ProductListScreenState ..> ProductFavoritesProvider : creates
+
+ProductDetailScreen --> Product
+ProductFormScreen --> Product
+ProductFormScreen --> _ProductFormScreenState
+_ProductFormScreenState --> ProductService
+_ProductFormScreenState --> Product
+
+ProductFavoritesActivityScreen --> _ProductFavoritesActivityScreenState
+_ProductFavoritesActivityScreenState --> ProductFavoritesProvider
+
+ProductCard --> Product
+
+@enduml
