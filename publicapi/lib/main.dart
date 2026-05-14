@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:publicapi/screens/product_list_screen.dart';
+import 'package:publicapi/screens/auth_gate.dart';
+import 'package:publicapi/services/session_manager.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SessionManager().initialize();
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final bool autoLoadProducts;
-
-  const MyApp({super.key, this.autoLoadProducts = true});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Product CRUD',
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
-      home: ProductListScreen(autoLoad: autoLoadProducts),
+      home: const AuthGate(),
     );
   }
 }

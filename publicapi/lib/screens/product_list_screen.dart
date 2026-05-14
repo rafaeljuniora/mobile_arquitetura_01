@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:publicapi/models/product.dart';
 import 'package:publicapi/providers/product_favorites_provider.dart';
+import 'package:publicapi/screens/auth_gate.dart';
+import 'package:publicapi/services/auth_service.dart';
 import 'package:publicapi/screens/product_detail_screen.dart';
 import 'package:publicapi/screens/product_favorites_activity_screen.dart';
 import 'package:publicapi/screens/product_form_screen.dart';
@@ -19,6 +21,7 @@ class ProductListScreen extends StatefulWidget {
 
 class _ProductListScreenState extends State<ProductListScreen> {
   final ProductService _service = ProductService();
+  final AuthService _authService = AuthService();
   late Future<List<Product>> _productsFuture;
 
   @override
@@ -95,6 +98,41 @@ class _ProductListScreenState extends State<ProductListScreen> {
       appBar: AppBar(
         title: const Text('Lista de Produtos'),
         actions: [
+          FutureBuilder<Map<String, dynamic>?>(
+            future: _authService.getUser(),
+            builder: (context, snapshot) {
+              final user = snapshot.data;
+              final image = user?['image'] as String? ?? user?['thumbnail'] as String?;
+              final name = user != null
+                  ? ((user['firstName'] ?? '') + ' ' + (user['lastName'] ?? ''))
+                  : (snapshot.connectionState == ConnectionState.waiting ? 'Carregando...' : 'Usuário');
+
+              return Row(
+                children: [
+                  if (image != null && image.isNotEmpty)
+                    CircleAvatar(radius: 14, backgroundImage: NetworkImage(image)),
+                  const SizedBox(width: 8),
+                  Text(name, style: Theme.of(context).textTheme.bodyMedium),
+                ],
+              );
+            },
+          ),
+          IconButton(
+            tooltip: 'Logout',
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await _authService.logout();
+              if (!mounted) return;
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => AuthGate()),
+              );
+            },
+          ),
+          IconButton(
+            tooltip: 'Atualizar',
+            icon: const Icon(Icons.refresh),
+            onPressed: _reload,
+          ),
           IconButton(
             tooltip: 'Atividade favoritos',
             icon: const Icon(Icons.star_outline),

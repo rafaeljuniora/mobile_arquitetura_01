@@ -1,18 +1,26 @@
 import 'package:dio/dio.dart';
 import 'package:publicapi/models/product.dart';
+import 'package:publicapi/core/api_client.dart';
 
 class ProductService {
-  final Dio _dio;
+  final ApiClient _apiClient = ApiClient();
+  late final Dio _dio;
 
-  ProductService([Dio? dio])
-    : _dio = dio ?? Dio(BaseOptions(baseUrl: 'https://fakestoreapi.com'));
+  ProductService() {
+    _dio = _apiClient.dio;
+  }
 
   Future<List<Product>> fetchProducts() async {
-    final response = await _dio.get<List<dynamic>>('/products');
-    final data = response.data ?? <dynamic>[];
+    final response = await _dio.get<Map<String, dynamic>>('/products');
+    final data = response.data?['products'] as List<dynamic>? ?? <dynamic>[];
     return data
         .map((item) => Product.fromJson(item as Map<String, dynamic>))
         .toList();
+  }
+
+  Future<Product> getProductById(int id) async {
+    final response = await _dio.get<Map<String, dynamic>>('/products/$id');
+    return Product.fromJson(response.data ?? <String, dynamic>{});
   }
 
   Future<Product> addProduct(Product product) async {

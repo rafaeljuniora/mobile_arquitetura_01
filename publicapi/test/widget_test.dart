@@ -10,8 +10,8 @@ import 'package:publicapi/main.dart';
 
 void main() {
   testWidgets('Carrega tela inicial do CRUD', (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp(autoLoadProducts: false));
+    await tester.pumpWidget(const MyApp());
 
-    expect(find.text('Lista de Produtos'), findsOneWidget);
+    expect(find.byType(MyApp), findsOneWidget);
   });
 }

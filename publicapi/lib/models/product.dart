@@ -5,6 +5,7 @@ class Product {
   final String description;
   final String category;
   final String image;
+  final String? thumbnail;
   final bool favorite;
 
   const Product({
@@ -14,6 +15,7 @@ class Product {
     required this.description,
     required this.category,
     required this.image,
+    this.thumbnail,
     this.favorite = false,
   });
 
@@ -24,8 +26,11 @@ class Product {
       price: _asDouble(json['price']),
       description: json['description']?.toString() ?? '',
       category: json['category']?.toString() ?? '',
-      image: json['image']?.toString() ?? '',
-      favorite: json['favorite'] == true,
+        image: json['images'] is List && (json['images'] as List).isNotEmpty
+          ? (json['images'] as List).first.toString()
+          : (json['image']?.toString() ?? json['thumbnail']?.toString() ?? ''),
+        thumbnail: json['thumbnail']?.toString(),
+        favorite: json['favorite'] == true,
     );
   }
 
@@ -37,6 +42,7 @@ class Product {
       'description': description,
       'category': category,
       'image': image,
+      if (thumbnail != null) 'thumbnail': thumbnail,
       'favorite': favorite,
     };
   }
@@ -48,6 +54,7 @@ class Product {
     String? description,
     String? category,
     String? image,
+    String? thumbnail,
     bool? favorite,
   }) {
     return Product(
@@ -57,6 +64,7 @@ class Product {
       description: description ?? this.description,
       category: category ?? this.category,
       image: image ?? this.image,
+      thumbnail: thumbnail ?? this.thumbnail,
       favorite: favorite ?? this.favorite,
     );
   }
