@@ -38,55 +38,107 @@ class ProductDetailScreen extends StatelessWidget {
   }
 
   Widget _buildDetail(BuildContext context, Product product) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Detalhes do Produto')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 260),
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: product.image.isEmpty
-                        ? const ColoredBox(
-                            color: Color(0xFFEFEFEF),
-                            child:
-                                Icon(Icons.image_not_supported, size: 48),
-                          )
-                        : Image.network(
-                            product.image,
-                            fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => const ColoredBox(
-                              color: Color(0xFFEFEFEF),
-                              child:
-                                  Icon(Icons.broken_image, size: 48),
-                            ),
-                          ),
+      body: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          _buildImageHeader(context, product),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  product.title,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Text(
+                      'R\$ ${product.price.toStringAsFixed(2)}',
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (product.category.isNotEmpty)
+                      Chip(
+                        avatar: Icon(
+                          Icons.category_outlined,
+                          size: 18,
+                          color: colorScheme.onSecondaryContainer,
+                        ),
+                        label: Text(product.category),
+                        backgroundColor: colorScheme.secondaryContainer,
+                        labelStyle: TextStyle(
+                          color: colorScheme.onSecondaryContainer,
+                        ),
+                        side: BorderSide.none,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                const Divider(height: 1),
+                const SizedBox(height: 24),
+                Text(
+                  'Descrição',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  product.description.isEmpty
+                      ? 'Sem descrição disponível.'
+                      : product.description,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImageHeader(BuildContext context, Product product) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      width: double.infinity,
+      height: 320,
+      color: colorScheme.surfaceContainerHighest,
+      alignment: Alignment.center,
+      child: product.image.isEmpty
+          ? Icon(
+              Icons.image_not_supported_outlined,
+              size: 64,
+              color: colorScheme.onSurfaceVariant,
+            )
+          : Image.network(
+              product.image,
+              fit: BoxFit.contain,
+              loadingBuilder: (context, child, progress) {
+                if (progress == null) return child;
+                return const Center(child: CircularProgressIndicator());
+              },
+              errorBuilder: (_, __, ___) => Icon(
+                Icons.broken_image_outlined,
+                size: 64,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              product.title,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            Text('Preco: R\$ ${product.price.toStringAsFixed(2)}'),
-            const SizedBox(height: 8),
-            Text('Categoria: ${product.category}'),
-            const SizedBox(height: 16),
-            Text('Descricao', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Text(product.description),
-          ],
-        ),
-      ),
     );
   }
 }
