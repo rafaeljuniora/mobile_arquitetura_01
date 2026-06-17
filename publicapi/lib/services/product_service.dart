@@ -25,8 +25,8 @@ class ProductService {
 
   Future<Product> addProduct(Product product) async {
     final response = await _dio.post<Map<String, dynamic>>(
-      '/products',
-      data: product.toJson(),
+      '/products/add',
+      data: product.toJson()..remove('id'),
     );
     return Product.fromJson(response.data ?? <String, dynamic>{});
   }
@@ -38,7 +38,7 @@ class ProductService {
 
     final response = await _dio.put<Map<String, dynamic>>(
       '/products/${product.id}',
-      data: product.toJson(),
+      data: product.toJson()..remove('id'),
     );
     return Product.fromJson(response.data ?? <String, dynamic>{});
   }
