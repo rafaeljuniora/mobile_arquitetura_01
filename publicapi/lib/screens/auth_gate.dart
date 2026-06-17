@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:publicapi/providers/product_favorites_provider.dart';
 import 'package:publicapi/screens/login_screen.dart';
 import 'package:publicapi/screens/product_list_screen.dart';
+import 'package:publicapi/services/product_service.dart';
 import 'package:publicapi/services/session_manager.dart';
 
 class AuthGate extends StatefulWidget {
@@ -34,7 +37,10 @@ class _AuthGateState extends State<AuthGate> {
           return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
         if (snapshot.data == true) {
-          return ProductListScreen(autoLoad: true);
+          return ChangeNotifierProvider(
+            create: (_) => ProductFavoritesProvider(ProductService()),
+            child: const ProductListScreen(autoLoad: true),
+          );
         }
         return const LoginScreen();
       },

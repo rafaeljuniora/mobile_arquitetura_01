@@ -87,7 +87,7 @@ class _ProductFavoritesActivityScreenState
                       itemCount: products.length,
                       itemBuilder: (context, index) {
                         final product = products[index];
-                        final isFavorite = product.favorite;
+                        final isFavorite = state.isFavorite(product.id);
 
                         return Card(
                           margin: const EdgeInsets.symmetric(

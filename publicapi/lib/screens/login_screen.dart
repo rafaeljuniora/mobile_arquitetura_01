@@ -10,6 +10,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
@@ -23,9 +24,23 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  String? _validateUsername(String? value) {
+    final text = value?.trim() ?? '';
+    if (text.isEmpty) return 'Informe o usuario.';
+    if (text.length < 3) return 'Usuario deve ter ao menos 3 caracteres.';
+    if (text.contains(' ')) return 'Usuario nao pode conter espacos.';
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    final text = value ?? '';
+    if (text.isEmpty) return 'Informe a senha.';
+    if (text.length < 6) return 'Senha deve ter ao menos 6 caracteres.';
+    return null;
+  }
+
   Future<void> _handleLogin() async {
-    if (_usernameController.text.trim().isEmpty || _passwordController.text.isEmpty) {
-      setState(() { _errorMessage = 'Preencha usuario e senha.'; });
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
@@ -67,18 +82,22 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(title: const Text('Login')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
-        child: Column(
+        child: Form(
+          key: _formKey,
+          child: Column(
           children: [
             const SizedBox(height: 48),
-            TextField(
+            TextFormField(
               controller: _usernameController,
               decoration: const InputDecoration(labelText: 'Username'),
+              validator: _validateUsername,
             ),
             const SizedBox(height: 16),
-            TextField(
+            TextFormField(
               controller: _passwordController,
               decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
+              validator: _validatePassword,
             ),
             if (_errorMessage != null) ...[
               const SizedBox(height: 12),
@@ -90,6 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: _isLoading ? const CircularProgressIndicator() : const Text('Entrar'),
             ),
           ],
+          ),
         ),
       ),
     );

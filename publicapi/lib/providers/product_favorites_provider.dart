@@ -1,13 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:publicapi/models/product.dart';
 import 'package:publicapi/services/product_service.dart';
+import 'package:publicapi/services/session_manager.dart';
 
 class ProductFavoritesProvider extends ChangeNotifier {
   final ProductService _service;
+  final SessionManager _session = SessionManager();
 
-  ProductFavoritesProvider(this._service);
+  ProductFavoritesProvider(this._service) {
+    _loadFavoriteIds();
+  }
 
   final List<Product> _products = <Product>[];
+  final Set<int> _favoriteIds = <int>{};
   bool _isLoading = false;
   bool _showOnlyFavorites = false;
   String? _error;
@@ -16,13 +21,25 @@ class ProductFavoritesProvider extends ChangeNotifier {
   bool get showOnlyFavorites => _showOnlyFavorites;
   String? get error => _error;
 
-  int get favoriteCount => _products.where((p) => p.favorite).length;
+  int get favoriteCount => _favoriteIds.length;
+
+  bool isFavorite(int? id) => id != null && _favoriteIds.contains(id);
 
   List<Product> get products {
     if (!_showOnlyFavorites) {
       return List<Product>.unmodifiable(_products);
     }
-    return List<Product>.unmodifiable(_products.where((p) => p.favorite));
+    return List<Product>.unmodifiable(
+      _products.where((p) => isFavorite(p.id)),
+    );
+  }
+
+  Future<void> _loadFavoriteIds() async {
+    final ids = await _session.getFavoriteProductIds();
+    _favoriteIds
+      ..clear()
+      ..addAll(ids);
+    notifyListeners();
   }
 
   Future<void> loadProducts() async {
@@ -31,22 +48,10 @@ class ProductFavoritesProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final previousFavorites = <int>{
-        for (final product in _products)
-          if (product.favorite && product.id != null) product.id!,
-      };
-
       final fetched = await _service.fetchProducts();
       _products
         ..clear()
-        ..addAll(
-          fetched.map(
-            (product) => product.copyWith(
-              favorite:
-                  product.id != null && previousFavorites.contains(product.id),
-            ),
-          ),
-        );
+        ..addAll(fetched);
     } catch (_) {
       _error = 'Erro ao carregar produtos.';
     } finally {
@@ -55,19 +60,18 @@ class ProductFavoritesProvider extends ChangeNotifier {
     }
   }
 
-  void toggleFavorite(Product target) {
-    final index = _products.indexWhere((product) {
-      if (product.id != null && target.id != null) {
-        return product.id == target.id;
-      }
-      return product.title == target.title && product.price == target.price;
-    });
+  Future<void> toggleFavorite(Product target) async {
+    final id = target.id;
+    if (id == null) return;
 
-    if (index == -1) return;
-
-    final product = _products[index];
-    _products[index] = product.copyWith(favorite: !product.favorite);
+    if (_favoriteIds.contains(id)) {
+      _favoriteIds.remove(id);
+    } else {
+      _favoriteIds.add(id);
+    }
     notifyListeners();
+
+    await _session.saveFavoriteProductIds(_favoriteIds);
   }
 
   void toggleFavoritesFilter() {

@@ -104,7 +104,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
               final user = snapshot.data;
               final image = user?['image'] as String? ?? user?['thumbnail'] as String?;
               final name = user != null
-                  ? ((user['firstName'] ?? '') + ' ' + (user['lastName'] ?? ''))
+                  ? '${user['firstName'] ?? ''} ${user['lastName'] ?? ''}'
                   : (snapshot.connectionState == ConnectionState.waiting ? 'Carregando...' : 'Usuário');
 
               return Row(
@@ -121,10 +121,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
             tooltip: 'Logout',
             icon: const Icon(Icons.logout),
             onPressed: () async {
+              final navigator = Navigator.of(context);
               await _authService.logout();
               if (!mounted) return;
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (_) => AuthGate()),
+              navigator.pushReplacement(
+                MaterialPageRoute(builder: (_) => const AuthGate()),
               );
             },
           ),
@@ -137,11 +138,13 @@ class _ProductListScreenState extends State<ProductListScreen> {
             tooltip: 'Atividade favoritos',
             icon: const Icon(Icons.star_outline),
             onPressed: () {
+              final favoritesProvider =
+                  context.read<ProductFavoritesProvider>();
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => ChangeNotifierProvider(
-                    create: (_) => ProductFavoritesProvider(ProductService()),
+                  builder: (_) => ChangeNotifierProvider.value(
+                    value: favoritesProvider,
                     child: const ProductFavoritesActivityScreen(),
                   ),
                 ),
@@ -184,18 +187,22 @@ class _ProductListScreenState extends State<ProductListScreen> {
               itemCount: products.length,
               itemBuilder: (context, index) {
                 final product = products[index];
-                return ProductCard(
-                  product: product,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ProductDetailScreen(product: product),
-                      ),
-                    );
-                  },
-                  onEdit: () => _openForm(product: product),
-                  onDelete: () => _deleteProduct(product),
+                return Consumer<ProductFavoritesProvider>(
+                  builder: (context, favorites, _) => ProductCard(
+                    product: product,
+                    isFavorite: favorites.isFavorite(product.id),
+                    onToggleFavorite: () => favorites.toggleFavorite(product),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ProductDetailScreen(product: product),
+                        ),
+                      );
+                    },
+                    onEdit: () => _openForm(product: product),
+                    onDelete: () => _deleteProduct(product),
+                  ),
                 );
               },
             ),

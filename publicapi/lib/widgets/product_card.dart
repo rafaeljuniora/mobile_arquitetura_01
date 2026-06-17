@@ -3,14 +3,18 @@ import 'package:publicapi/models/product.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
+  final bool isFavorite;
   final VoidCallback onTap;
+  final VoidCallback onToggleFavorite;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const ProductCard({
     super.key,
     required this.product,
+    required this.isFavorite,
     required this.onTap,
+    required this.onToggleFavorite,
     required this.onEdit,
     required this.onDelete,
   });
@@ -45,6 +49,16 @@ class ProductCard extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            IconButton(
+              onPressed: onToggleFavorite,
+              icon: Icon(
+                isFavorite ? Icons.star : Icons.star_border,
+                color: isFavorite ? Colors.amber[700] : null,
+              ),
+              tooltip: isFavorite
+                  ? 'Remover dos favoritos'
+                  : 'Marcar como favorito',
+            ),
             IconButton(
               onPressed: onEdit,
               icon: const Icon(Icons.edit_outlined),

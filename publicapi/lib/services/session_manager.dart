@@ -13,9 +13,7 @@ class SessionManager {
   }
 
   Future<SharedPreferences> _ensure() async {
-    if (_prefs == null) {
-      _prefs = await SharedPreferences.getInstance();
-    }
+    _prefs ??= await SharedPreferences.getInstance();
     return _prefs!;
   }
 
@@ -47,6 +45,20 @@ class SessionManager {
   Future<String?> getToken() async {
     final prefs = await _ensure();
     return prefs.getString('auth_token');
+  }
+
+  Future<void> saveFavoriteProductIds(Set<int> ids) async {
+    final prefs = await _ensure();
+    await prefs.setStringList(
+      'favorite_ids',
+      ids.map((id) => id.toString()).toList(),
+    );
+  }
+
+  Future<Set<int>> getFavoriteProductIds() async {
+    final prefs = await _ensure();
+    final stored = prefs.getStringList('favorite_ids') ?? <String>[];
+    return stored.map(int.tryParse).whereType<int>().toSet();
   }
 
   Future<bool> isAuthenticated() async {
